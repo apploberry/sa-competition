@@ -41,7 +41,7 @@ import json
 exam_mode = True
 
 # 2. 대화 길이
-sentence_len = 4
+sentence_len = 2
 
 # 3. Sentence에 Speaker 추가 
 flag_speaker = True
@@ -51,17 +51,16 @@ flag_speaker = True
 MAX_LEN = 0
 
 # 5. Pre-trained Model Name
-# PRETRAINED_MODEL = 'bert-base-multilingual-cased'
-PRETRAINED_MODEL = 'bert-large-cased'
+PRETRAINED_MODEL = 'bert-base-multilingual-cased'
 
 # 6. Batch Size
-BATCH_SIZE = 24
+BATCH_SIZE = 36
 
 # 7. 에폭수
-EPOCHS = 12
+EPOCHS = 4
 
 # 8. RANDOM SEED
-SEED = 2021
+SEED = 42
 
 # 학습 Data를 가져오기 #
 
@@ -322,7 +321,7 @@ model.cuda()
 
 # 옵티마이저 설정
 optimizer = AdamW(model.parameters(),
-                  lr = 2e-6, # 학습률
+                  lr = 2e-5, # 학습률
                   eps = 1e-8 # 0으로 나누는 것을 방지하기 위한 epsilon 값
                 )
 
