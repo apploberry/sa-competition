@@ -8,8 +8,12 @@ Original file is located at
 """
 
 '''
+# transformer install
 !pip install transformers
+
+# learning data file download
 !git clone https://github.com/apploberry/sa-competition.git
+
 '''
 
 import tensorflow as tf
@@ -29,7 +33,7 @@ import time
 import datetime
 import json
 
-#### Constraint 설정 ####
+# Constraint 설정 #
 
 # 1. Competition 제출 모드 
 #    True : Competition 제출 파일 생성
@@ -47,18 +51,19 @@ flag_speaker = True
 MAX_LEN = 0
 
 # 5. Pre-trained Model Name
-PRETRAINED_MODEL = 'bert-base-multilingual-cased'
+# PRETRAINED_MODEL = 'bert-base-multilingual-cased'
+PRETRAINED_MODEL = 'bert-large-cased'
 
 # 6. Batch Size
 BATCH_SIZE = 24
 
 # 7. 에폭수
-EPOCHS = 1
+EPOCHS = 12
 
 # 8. RANDOM SEED
-SEED = 42
+SEED = 2021
 
-#### 학습 Data를 가져오기 ####
+# 학습 Data를 가져오기 #
 
 
 with open('sa-competition/EN-SA/data/Friends_train.json', 'r', encoding='UTF-8') as f:
@@ -73,7 +78,9 @@ with open('sa-competition/EN-SA/data/Friends_dev.json', 'r', encoding='UTF-8') a
 dev = pd.array(json_dev)
 print('dev set: ', dev.shape)
 
-#### Test Data load ####
+# Test Data load #
+
+
 test = []
 sen_set = []
 i = 0
@@ -98,7 +105,8 @@ else:  # test인 경우
 test = pd.array(test)
 print('test set: ', test.shape)
 
-#### Function 선언 ####
+# Function 선언 #
+
 
 def labeltoint(lbl):
     return {'neutral': 0, 'non-neutral': 1, 'joy': 2, 'sadness': 3, 'anger': 4, 'surprise': 5, 'fear': 6, 'disgust': 7}[lbl]
@@ -179,7 +187,7 @@ def makeTalkingSet(trainingSet):
 
     return sentences, labels, speaker
 
-#### train, dev(검증), test 데이터의 문장을 BERT 학습 형태로 수정 ####
+# train, dev(검증), test 데이터의 문장을 BERT 학습 형태로 수정 #
 
 sentences_train, labels_train, speaker_train = makeTalkingSet(train)
 sentences_dev, labels_dev, speaker_dev = makeTalkingSet(dev)
@@ -190,7 +198,7 @@ print(sentences_train[:10])
 print(len(labels_train))
 print(labels_train[:100])
 
-#### BERT Tokenizer 로 데이터 Tokenize ####
+# BERT Tokenizer 로 데이터 Tokenize #
 
 tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL, do_lower_case=False)
 tokenized_texts_train = [tokenizer.tokenize(sent) for sent in sentences_train]
@@ -200,7 +208,7 @@ tokenized_texts_dev = [tokenizer.tokenize(sent) for sent in sentences_dev]
 print(sentences_train[0])
 print(tokenized_texts_train[0])
 
-#### Tokenized Test 최대 길이를 구해서 MAX_LEN 설정 ####
+# Tokenized Test 최대 길이를 구해서 MAX_LEN 설정 #
 
 # constraint 에서 MAX_LEN = 0 인 경우에만 구함
 
@@ -216,7 +224,7 @@ if MAX_LEN == 0:
     MAX_LEN = max(str_len)
     print('tokenized text의 최대 길이 : ',MAX_LEN)
 
-#### tokens to ids 수행 ####
+# tokens to ids 수행 #
 
 input_ids_train = [tokenizer.convert_tokens_to_ids(x) for x in tokenized_texts_train]
 input_ids_train = pad_sequences(input_ids_train, maxlen=MAX_LEN, dtype='long', truncating='post', padding='post')
@@ -229,7 +237,7 @@ input_ids_dev = pad_sequences(input_ids_dev, maxlen=MAX_LEN, dtype='long', trunc
 
 input_ids_train[0]
 
-#### Attention Mask 생성 ####
+# Attention Mask 생성 #
 
 def set_attention_masks(input_ids):
     attention_masks = []
@@ -246,7 +254,7 @@ attention_masks_dev = set_attention_masks(input_ids_dev)
 
 print(attention_masks_train[0])
 
-#### tensor 로 변환 ####
+# tensor 로 변환 #
 
 train_inputs = torch.tensor(input_ids_train)
 train_labels = torch.tensor(labels_train)
@@ -262,7 +270,7 @@ print(validation_inputs[0])
 print(validation_labels[0])
 print(validation_masks[0])
 
-#### train_dataloader 준비 ####
+# train_dataloader 준비 #
 
 batch_size = BATCH_SIZE
 
@@ -274,7 +282,7 @@ validation_data = TensorDataset(validation_inputs, validation_masks, validation_
 validation_sampler = RandomSampler(validation_data)
 validation_dataloader = DataLoader(validation_data, sampler=validation_sampler, batch_size=batch_size)
 
-#### test_dataloader 준비 ####
+# test_dataloader 준비 #
 
 # test data는 sample 추출시 SequentialSampler 사용
 
@@ -286,7 +294,7 @@ test_data = TensorDataset(test_inputs, test_masks, test_labels)
 test_sampler = SequentialSampler(test_data)
 test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=batch_size)
 
-#### GPU Name 확인 ####
+# GPU Name 확인 #
 
 device_name = tf.test.gpu_device_name()
 
@@ -295,7 +303,7 @@ if device_name == '/device:GPU:0':
 else:
     raise SystemError('GPU device not found')
 
-#### Cuda GPU 환경 확인 ####
+# Cuda GPU 환경 확인 #
 
 if torch.cuda.is_available():    
     device = torch.device("cuda")
@@ -305,12 +313,12 @@ else:
     device = torch.device("cpu")
     print('No GPU available, using the CPU instead.')
 
-#### Pre-trained Model 불러오기 ####
+# Pre-trained Model 불러오기 #
 
 model = BertForSequenceClassification.from_pretrained(PRETRAINED_MODEL, num_labels=8)
 model.cuda()
 
-#### 학습 환경 설정 ####
+# 학습 환경 설정 #
 
 # 옵티마이저 설정
 optimizer = AdamW(model.parameters(),
@@ -329,7 +337,7 @@ scheduler = get_linear_schedule_with_warmup(optimizer,
                                             num_warmup_steps = 0,
                                             num_training_steps = total_steps)
 
-#### 학습 관련 함수 선언 ####
+# 학습 관련 함수 선언 #
 
 # 정확도 계산 함수
 def flat_accuracy(preds, labels):
@@ -348,7 +356,7 @@ def format_time(elapsed):
     # hh:mm:ss으로 형태 변경
     return datetime.timedelta(seconds=elapsed_rounded)
 
-#### 모델 학습 ####
+# 모델 학습 #
 
 # 랜덤시드 고정
 seed_val = SEED
@@ -478,7 +486,7 @@ for epoch_i in range(0, epochs):
 print("")
 print("Training complete!")
 
-#### 모델 TEST ####
+# 모델 TEST #
 
 #시작 시간 설정
 t0 = time.time()
@@ -539,7 +547,7 @@ if exam_mode == False: # 정확도는 exam_mode = False 일때만 보여준다. 
     print("Accuracy: {0:.2f}".format(eval_accuracy/nb_eval_steps))
 print("Test took: {:}".format(format_time(time.time() - t0)))
 
-#### Competition 결과 저장 ####
+# Competition 결과 저장 #
 
 import csv
 
