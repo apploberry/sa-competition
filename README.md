@@ -2,6 +2,7 @@
 KU 빅데이터자연어처리 SA competition
 
 
+
 # 한글 감성분석 모델
 
 
@@ -20,22 +21,12 @@ Output
  - google colab에서 실행
  - 다른 환경에서 실행 시에는 필요한 package install 후 실행 (추가로 필요한 package는 source code 참고)
  
-    KO-BART install
-    !pip install torch==1.7.1+cu101 torchvision==0.8.1+cu101 torchaudio===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html pytorch_lightning
-    !pip install git+https://github.com/SKT-AI/KoBART#egg=kobart
-
-    한글 문장분리기 설치
-    !pip install kss
-
-    transformers install
-    !pip install transformers
-
-    learning data file download
-    !git clone https://github.com/e9t/nsmc.git
-    !git clone https://github.com/apploberry/sa-competition.git
+ 
+ 
 
 
 # 영어 감성분석 모델
+
 
 영어 모델 위치 : ./SA-EN/en-model.py 또는 en-model.ipynb (같은 모델)
 
@@ -51,9 +42,5 @@ Output
  - google colab에서 실행
  - 다른 환경에서 실행 시에는 필요한 package install 후 실행 (추가로 필요한 package는 source code 참고)
 
-    transformer install
-    !pip install transformers
 
-    learning data file download
-    !git clone https://github.com/apploberry/sa-competition.git
 
